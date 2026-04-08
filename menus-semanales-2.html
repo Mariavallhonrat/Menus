@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mis Menús">
+<meta name="theme-color" content="#000000">
+<title>Mis Menús</title>
+<style>
+:root{--bg:#000;--bg2:#1c1c1e;--bg3:#2c2c2e;--bg4:#3a3a3c;--text:#fff;--text2:rgba(235,235,245,.8);--text3:rgba(235,235,245,.6);--accent:#30d158;--blue:#0a84ff;--orange:#ff9f0a;--red:#ff453a;--sep:rgba(255,255,255,.1);--r:16px;--safe-top:env(safe-area-inset-top,44px);--safe-bot:env(safe-area-inset-bottom,34px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display','SF Pro Text',sans-serif;overflow:hidden}
+#splash{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .5s}
+.sp-icon{width:80px;height:80px;background:linear-gradient(145deg,#30d158,#0a84ff);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:20px}
+.sp-title{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.sp-sub{color:var(--text3);font-size:14px;margin-top:6px}
+.sp-loader{margin-top:40px;width:120px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.sp-bar{height:100%;width:0;background:linear-gradient(90deg,#30d158,#0a84ff);border-radius:2px;animation:load 1.6s ease forwards}
+@keyframes load{to{width:100%}}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+.header{padding:calc(var(--safe-top) + 8px) 20px 12px;background:rgba(0,0,0,.85);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--sep);flex-shrink:0;z-index:10}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.header h1{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.week-badge{background:var(--accent);color:#000;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px}
+.wscroll{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.wscroll::-webkit-scrollbar{display:none}
+.wbtn{flex-shrink:0;padding:7px 16px;border-radius:20px;font-size:14px;font-weight:500;border:1.5px solid var(--bg4);background:transparent;color:var(--text3);cursor:pointer;transition:all .2s}
+.wbtn.active{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700}
+.vtabs{display:flex;gap:2px;padding:8px 16px;background:rgba(0,0,0,.85);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);flex-shrink:0}
+.vtab{flex:1;padding:8px;text-align:center;border-radius:10px;font-size:14px;font-weight:500;color:var(--text3);background:transparent;border:none;cursor:pointer;transition:all .2s}
+.vtab.active{background:var(--bg3);color:var(--text);font-weight:600}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 calc(var(--safe-bot) + 20px)}
+.daynav{display:flex;gap:6px;padding:14px 16px 4px;overflow-x:auto;scrollbar-width:none}
+.daynav::-webkit-scrollbar{display:none}
+.dbtn{flex-shrink:0;min-width:58px;padding:8px 4px;border-radius:14px;background:var(--bg3);border:none;cursor:pointer;text-align:center;transition:all .2s}
+.dbtn .ds{display:block;font-size:10px;font-weight:600;color:var(--text3);margin-bottom:2px;letter-spacing:.04em}
+.dbtn .dn{display:block;font-size:14px;font-weight:600;color:var(--text2)}
+.dbtn.active{background:var(--blue)}
+.dbtn.active .ds,.dbtn.active .dn{color:#fff}
+.statsbar{display:flex;gap:10px;padding:12px 16px}
+.statpill{flex:1;background:var(--bg2);border-radius:14px;padding:10px 12px;border:.5px solid var(--sep)}
+.statpill .sl{font-size:11px;color:var(--text3);margin-bottom:2px}
+.statpill .sv{font-size:18px;font-weight:700}
+.statpill .su{font-size:11px;color:var(--text3);font-weight:400}
+.statpill.g .sv{color:var(--accent)}
+.statpill.b .sv{color:var(--blue)}
+.statpill.o .sv{color:var(--orange)}
+.mlist{padding:0 16px;display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.mcard{background:var(--bg2);border-radius:var(--r);border:.5px solid var(--sep);overflow:hidden}
+.mcard-head{padding:14px 16px 0}
+.mmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.mtype{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.mbadge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.bp{background:rgba(255,159,10,.2);color:var(--orange)}
+.bt{background:rgba(10,132,255,.2);color:var(--blue)}
+.bc{background:rgba(48,209,88,.2);color:var(--accent)}
+.mname{font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+.mdesc{font-size:14px;color:var(--text3);line-height:1.5;padding-bottom:12px}
+.mfoot{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:.5px solid var(--sep);background:rgba(255,255,255,.02)}
+.mmacros{font-size:13px;color:var(--text3)}
+.mmacros span{color:var(--text2);font-weight:600}
+.rtoggle{font-size:14px;font-weight:600;color:var(--blue);background:none;border:none;cursor:pointer;padding:0}
+.rpanel{padding:14px 16px;border-top:.5px solid var(--sep);background:rgba(10,132,255,.05);display:none}
+.rpanel.open{display:block}
+.rlabel{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px}
+.ichips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.ichip{font-size:13px;padding:4px 10px;background:var(--bg3);border-radius:20px;color:var(--text2)}
+.step{display:flex;gap:10px;margin-bottom:10px}
+.snum{width:22px;height:22px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px}
+.stxt{font-size:14px;color:var(--text2);line-height:1.5}
+.tip{margin:12px 16px 8px;padding:12px 14px;background:rgba(48,209,88,.1);border-radius:14px;border:.5px solid rgba(48,209,88,.3);font-size:13px;color:var(--text2);line-height:1.5}
+.tip strong{color:var(--accent)}
+
+.shopitem{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--sep);cursor:pointer;transition:opacity .2s}
+.shopitem:last-child{border-bottom:none}
+.shopitem.done{opacity:.4}
+.checkc{width:24px;height:24px;border-radius:50%;border:2px solid var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.shopitem.done .checkc{background:var(--accent);border-color:var(--accent)}
+.checkc svg{display:none}
+.shopitem.done .checkc svg{display:block}
+.shopitem-info{flex:1}
+.shopitem-name{font-size:15px;font-weight:500;color:var(--text)}
+.shopitem.done .shopitem-name{text-decoration:line-through;color:var(--text3)}
+.tarrotag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:6px;margin-left:6px;background:rgba(255,159,10,.2);color:var(--orange);vertical-align:middle}
+.shopitem-qty{font-size:13px;color:var(--text2);white-space:nowrap}
+.shopsec{background:var(--bg2);border-radius:var(--r);margin:10px 16px 0;padding:0 14px;border:.5px solid var(--sep);overflow:hidden}
+.shopprog{margin:12px 16px 0;padding:12px 14px;background:var(--bg2);border-radius:14px;border:.5px solid var(--sep)}
+.shopprog-top{display:flex;justify-content:space-between;margin-bottom:8px}
+.shopprog-lbl{font-size:13px;color:var(--text2)}
+.shopprog-cnt{font-size:13px;font-weight:700;color:var(--accent)}
+.progbar{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.progfill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+.clearbtn{width:calc(100% - 32px);margin:12px 16px 0;padding:14px;background:var(--bg3);border:none;border-radius:14px;color:var(--red);font-size:15px;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="splash">
+  <div class="sp-icon">🥗</div>
+  <div class="sp-title">Mis Menús</div>
+  <div class="sp-sub">6 semanas · 1500 kcal · ~110g proteína</div>
+  <div class="sp-loader"><div class="sp-bar"></div></div>
+</div>
+<div id="app" style="display:none">
+  <div class="header">
+    <div class="header-top">
+      <h1 id="htitle">Semana 1</h1>
+      <div class="week-badge" id="hbadge">Lunes</div>
+    </div>
+    <div class="wscroll" id="wscroll"></div>
+  </div>
+  <div class="vtabs">
+    <button class="vtab active" onclick="setView('menu')">Menú semanal</button>
+    <button class="vtab" onclick="setView('shop')">Lista de la compra</button>
+  </div>
+  <div class="scroll" id="scroll">
+    <div id="vmenu">
+      <div class="statsbar" id="stats"></div>
+      <div class="daynav" id="daynav"></div>
+      <div class="mlist" id="mlist"></div>
+    </div>
+    <div id="vshop" style="display:none">
+      <div class="shopprog">
+        <div class="shopprog-top"><span class="shopprog-lbl">Productos comprados</span><span class="shopprog-cnt" id="pcnt">0 / 0</span></div>
+        <div class="progbar"><div class="progfill" id="pfill" style="width:0%"></div></div>
+      </div>
+      <div id="shoplist"></div>
+      <button class="clearbtn" onclick="clearShop()">Desmarcar todo</button>
+    </div>
+  </div>
+</div>
+<script>
+const DAYS=['Lunes','Martes','Miércoles','Jueves','Viernes'];
+const DS=['LUN','MAR','MIÉ','JUE','VIE'];
+const BL={prep:'Noche anterior',tupper:'Tupper',casa:'En casa'};
+const BC={prep:'bp',tupper:'bt',casa:'bc'};
+
+const W=[
+{name:'Semana 1',kcal:1500,prot:108,tip:'Prepara el pollo y el salmón el domingo. El overnight oats se hace en 2 min la noche anterior.',
+days:[
+{meals:[
+{type:'Desayuno',name:'Overnight oats con yogur',b:'prep',kcal:320,prot:22,desc:'Avena, yogur griego, plátano y canela en tarro.',i:['50g avena','150g yogur griego','1 plátano','canela al gusto'],s:['Mezcla la avena con el yogur en un tarro.','Añade el plátano en rodajas y la canela.','Tapa y deja en la nevera toda la noche.']},
+{type:'Tupper',name:'Pollo al limón con arroz',b:'tupper',kcal:450,prot:42,desc:'Pechuga a la plancha, tarro de arroz integral, brócoli al vapor.',i:['150g pechuga pollo','1 tarro arroz integral','100g brócoli','zumo de limón','sal, aceite'],s:['Salpimienta la pechuga y cocínala a la plancha 4 min por lado.','Calienta el brócoli al vapor 3 min.','Monta el tupper con el arroz, el pollo en tiras y el brócoli. Limón al gusto.']},
+{type:'Snack',name:'Requesón con nueces',b:'tupper',kcal:160,prot:14,desc:'150g requesón con nueces.',i:['150g requesón','30g nueces'],s:['Pon el requesón en un tupper pequeño.','Añade las nueces encima.']},
+{type:'Cena',name:'Tortilla de espinacas',b:'casa',kcal:360,prot:28,desc:'3 huevos, espinacas salteadas, queso fresco y ensalada.',i:['3 huevos','100g espinacas','50g queso fresco','lechuga, tomate'],s:['Saltea las espinacas con aceite 2 min.','Bate los huevos, añade las espinacas y el queso.','Cuaja la tortilla a fuego medio 3 min por lado.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Batido de proteína',b:'prep',kcal:280,prot:28,desc:'Whey con leche, plátano y mantequilla de cacahuete.',i:['1 scoop whey','200ml leche','1 plátano','1 cda mantequilla cacahuete'],s:['Pon todos los ingredientes en el shaker.','Mezcla bien y lleva en la mochila.']},
+{type:'Tupper',name:'Salmón con boniato',b:'tupper',kcal:470,prot:38,desc:'Salmón al horno, boniato asado, judías verdes salteadas.',i:['150g salmón','150g boniato','100g judías verdes','ajo, aceite, sal'],s:['Hornea el salmón a 180° 15 min.','Cuece el boniato en dados 20 min al horno.','Saltea las judías con ajo 5 min. Monta el tupper.']},
+{type:'Snack',name:'Yogur griego con pepino',b:'tupper',kcal:130,prot:16,desc:'200g yogur griego con pepino y sal.',i:['200g yogur griego','½ pepino','sal'],s:['Corta el pepino en rodajas.','Sirve con el yogur en tupper.']},
+{type:'Cena',name:'Lentejas con huevo',b:'casa',kcal:410,prot:30,desc:'Tarro de lentejas con zanahoria, puerro y huevo duro.',i:['1 tarro lentejas','1 zanahoria','½ puerro','2 huevos','aceite, sal'],s:['Sofríe zanahoria y puerro en dados 5 min.','Añade las lentejas del tarro y calienta 5 min.','Sirve con el huevo duro encima.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Tostadas con pavo y aguacate',b:'prep',kcal:340,prot:24,desc:'2 tostadas integrales, pavo, tomate y aguacate.',i:['2 rebanadas pan integral','4 lonchas pavo','½ aguacate','1 tomate','sal'],s:['Tuesta el pan. Unta el aguacate aplastado.','Coloca el pavo y el tomate en rodajas.','Envuelve en papel film para llevar.']},
+{type:'Tupper',name:'Pollo al curry con quinoa',b:'tupper',kcal:440,prot:40,desc:'Pechuga en dados con curry suave, tarro de quinoa, espinacas.',i:['150g pechuga','1 tarro quinoa','80g espinacas','curry, cebolla, aceite, sal'],s:['Sofríe la cebolla 3 min. Añade el pollo en dados.','Añade curry al gusto y cocina 5 min.','Monta con la quinoa del tarro y las espinacas crudas.']},
+{type:'Snack',name:'Atún con zanahoria',b:'tupper',kcal:130,prot:18,desc:'1 lata atún con zanahoria y pepino en palitos.',i:['1 lata atún al natural','1 zanahoria','½ pepino'],s:['Corta zanahoria y pepino en palitos.','Monta en tupper con el atún escurrido.']},
+{type:'Cena',name:'Merluza a la plancha',b:'casa',kcal:340,prot:36,desc:'200g merluza, ensalada mixta con huevo duro.',i:['200g merluza','2 huevos','lechuga, tomate, pepino','aceite, limón, sal'],s:['Cocina la merluza a la plancha 3 min por lado.','Prepara la ensalada y el huevo duro.','Aliña con aceite y limón.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Overnight oats con frutos rojos',b:'prep',kcal:320,prot:22,desc:'Avena, yogur griego, frutos rojos y mantequilla de cacahuete.',i:['50g avena','150g yogur griego','80g frutos rojos','1 cda mantequilla cacahuete'],s:['Mezcla avena y yogur en tarro.','Añade los frutos rojos y la mantequilla.','Nevera toda la noche.']},
+{type:'Tupper',name:'Ternera con patata y pimiento',b:'tupper',kcal:460,prot:38,desc:'Ternera magra salteada, patata cocida, pimiento asado.',i:['150g ternera magra','150g patata','1 pimiento rojo','ajo, aceite, sal'],s:['Cuece la patata en dados 15 min.','Saltea la ternera en tiras con ajo 5 min.','Añade el pimiento asado. Monta el tupper.']},
+{type:'Snack',name:'Huevo duro y fruta',b:'tupper',kcal:140,prot:12,desc:'2 huevos duros y una pieza de fruta.',i:['2 huevos','1 manzana o naranja'],s:['Cuece los huevos 10 min.','Lleva con la fruta.']},
+{type:'Cena',name:'Revuelto de gambas',b:'casa',kcal:360,prot:32,desc:'3 huevos, gambas, champiñones, tostada integral.',i:['3 huevos','100g gambas','150g champiñones','1 rebanada pan integral','aceite, sal, perejil'],s:['Saltea los champiñones 4 min. Añade las gambas 2 min.','Vierte los huevos batidos y remueve a fuego bajo.','Sirve con la tostada.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Huevos revueltos con aguacate',b:'casa',kcal:380,prot:26,desc:'3 huevos revueltos, medio aguacate y tostada integral.',i:['3 huevos','½ aguacate','1 rebanada pan integral','sal, aceite'],s:['Bate los huevos y cuájalos a fuego lento.','Tuesta el pan y unta el aguacate.','Sirve juntos.']},
+{type:'Comida',name:'Pasta integral con atún',b:'casa',kcal:480,prot:36,desc:'Pasta integral, atún, salsa de tomate casera, albahaca.',i:['80g pasta integral','2 latas atún','200ml tomate triturado','ajo, albahaca, aceite'],s:['Cuece la pasta según el paquete.','Sofríe el ajo, añade el tomate y cocina 8 min.','Mezcla con el atún y la pasta. Albahaca fresca.']},
+{type:'Snack',name:'Yogur griego con miel',b:'casa',kcal:180,prot:16,desc:'200g yogur griego, miel y fruta de temporada.',i:['200g yogur griego','1 cda miel','fruta de temporada'],s:['Sirve el yogur en un bol.','Añade la miel y la fruta cortada.']},
+{type:'Cena',name:'Pollo al horno con verduras',b:'casa',kcal:420,prot:38,desc:'Muslo de pollo al horno con pimiento, cebolla, calabacín y patata.',i:['200g muslo de pollo','1 pimiento','1 cebolla','1 calabacín','150g patata','aceite, sal, orégano'],s:['Precalienta el horno a 200°.','Corta las verduras. Coloca en bandeja con el pollo.','Aliña con aceite, sal y orégano. Hornea 40 min.']}
+]}
+],
+shop:{
+'Proteínas frescas':[{n:'Pechuga de pollo',q:'600g'},{n:'Salmón',q:'150g'},{n:'Ternera magra',q:'150g'},{n:'Merluza',q:'200g'},{n:'Muslo de pollo',q:'200g'},{n:'Gambas peladas',q:'100g'},{n:'Huevos',q:'18 uds'}],
+'Lácteos y proteína':[{n:'Yogur griego natural',q:'4 x 200g'},{n:'Requesón',q:'150g'},{n:'Queso fresco',q:'50g'},{n:'Leche / bebida vegetal',q:'200ml'},{n:'Proteína whey',q:'1 scoop'}],
+'Verduras y fruta':[{n:'Brócoli',q:'100g'},{n:'Espinacas',q:'80g'},{n:'Judías verdes',q:'100g'},{n:'Boniato',q:'150g'},{n:'Champiñones',q:'150g'},{n:'Pimiento rojo',q:'2 uds'},{n:'Cebolla',q:'2 uds'},{n:'Calabacín',q:'1 ud'},{n:'Zanahoria',q:'1 ud'},{n:'Pepino',q:'2 uds'},{n:'Aguacate',q:'2 uds'},{n:'Plátano',q:'3 uds'},{n:'Frutos rojos',q:'80g'},{n:'Fruta temporada',q:'3 piezas'},{n:'Tomate',q:'3 uds'},{n:'Lechuga',q:'1 ud'},{n:'Puerro',q:'½ ud'}],
+'Latas y botes':[{n:'Atún al natural',q:'4 latas'},{n:'Tomate triturado',q:'200ml'},{n:'Pavo en lonchas',q:'8 lonchas'}],
+'Tarros ya hechos':[{n:'Arroz integral cocido',q:'2 tarros',t:true},{n:'Quinoa cocida',q:'1 tarro',t:true},{n:'Lentejas cocidas',q:'1 tarro',t:true}],
+'Básicos despensa':[{n:'Avena',q:'200g'},{n:'Pan integral',q:'1 barra'},{n:'Pasta integral',q:'80g'},{n:'Patata',q:'150g'},{n:'Mantequilla cacahuete',q:'1 bote'},{n:'Nueces',q:'30g'}]
+}},
+{name:'Semana 2',kcal:1505,prot:111,tip:'El pollo en adobo se puede marinar el domingo y cocinar en 10 min cada día.',
+days:[
+{meals:[
+{type:'Desayuno',name:'Tostadas con huevo y pavo',b:'prep',kcal:330,prot:26,desc:'2 tostadas integrales, 2 huevos cocidos, pavo y tomate.',i:['2 rebanadas pan integral','2 huevos','4 lonchas pavo','1 tomate','sal'],s:['Cuece los huevos la noche anterior 10 min.','Monta con el pavo y el tomate en las tostadas.']},
+{type:'Tupper',name:'Pollo en adobo con cuscús',b:'tupper',kcal:460,prot:42,desc:'Pechuga adobada con pimentón, tarro de cuscús, tomate cherry.',i:['150g pechuga','1 tarro cuscús','100g tomate cherry','pimentón, ajo, aceite, limón'],s:['Marina la pechuga con pimentón, ajo y limón.','Cocina a la plancha 4 min por lado.','Monta con el cuscús del tarro y los tomatitos.']},
+{type:'Snack',name:'Cottage con pepino',b:'tupper',kcal:130,prot:16,desc:'200g queso cottage con pepino en rodajas.',i:['200g queso cottage','½ pepino','sal'],s:['Sirve el cottage en tupper con el pepino.']},
+{type:'Cena',name:'Dorada al horno con patata',b:'casa',kcal:400,prot:36,desc:'Dorada entera al horno con patata panadero y limón.',i:['1 dorada mediana','200g patata','1 limón','ajo, aceite, perejil'],s:['Pon la patata en rodajas en bandeja con aceite 10 min.','Coloca la dorada encima, aliña. Hornea 20 min.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Batido verde con proteína',b:'prep',kcal:290,prot:28,desc:'Whey, espinacas, leche, plátano y canela.',i:['1 scoop whey','200ml leche','1 puñado espinacas','1 plátano','canela'],s:['Pon todo en la botella batidora.','Agita bien y lleva al gym.']},
+{type:'Tupper',name:'Atún con garbanzos y pimiento',b:'tupper',kcal:430,prot:38,desc:'Ensalada de atún, tarro de garbanzos, pimiento asado y pepino.',i:['2 latas atún','1 tarro garbanzos','pimiento asado','½ pepino','aceite, vinagre, sal'],s:['Escurre el atún y los garbanzos.','Mezcla con el pimiento y el pepino en dados.','Aliña con aceite y vinagre.']},
+{type:'Snack',name:'Huevo duro y almendras',b:'tupper',kcal:160,prot:14,desc:'2 huevos duros y un puñado de almendras.',i:['2 huevos','25g almendras'],s:['Cuece los huevos la noche anterior.','Lleva con las almendras en tupper.']},
+{type:'Cena',name:'Sopa de pollo con fideos',b:'casa',kcal:370,prot:32,desc:'Caldo casero con pechuga desmenuzada, zanahoria y fideos.',i:['150g pechuga','50g fideos finos','1 zanahoria','1 rama apio','sal'],s:['Cuece la pechuga en agua con zanahoria y apio 20 min.','Saca el pollo y desmenuza.','Añade los fideos al caldo 5 min. Sirve con el pollo.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Overnight oats con mango',b:'prep',kcal:325,prot:22,desc:'Avena, yogur griego, mango en dados y semillas de chía.',i:['50g avena','150g yogur griego','½ mango','1 cda chía'],s:['Mezcla avena y yogur.','Añade el mango y la chía. Nevera toda la noche.']},
+{type:'Tupper',name:'Pavo salteado con arroz',b:'tupper',kcal:450,prot:40,desc:'Pechuga de pavo en tiras, tarro de arroz, brócoli y soja.',i:['150g pechuga pavo','1 tarro arroz','100g brócoli','salsa de soja, ajo, aceite'],s:['Saltea el ajo, añade el pavo en tiras 5 min.','Añade el brócoli y un chorrito de soja 3 min.','Monta con el arroz del tarro.']},
+{type:'Snack',name:'Yogur griego con nueces',b:'tupper',kcal:160,prot:16,desc:'200g yogur griego con nueces y miel.',i:['200g yogur griego','25g nueces','1 cda miel'],s:['Sirve en tupper con las nueces y la miel.']},
+{type:'Cena',name:'Huevos al plato con tomate',b:'casa',kcal:340,prot:26,desc:'3 huevos al plato sobre salsa de tomate especiada.',i:['3 huevos','200ml tomate triturado','ajo, pimentón, comino','1 rebanada pan integral'],s:['Sofríe el ajo, añade el tomate y especias 8 min.','Haz huecos y rompe los huevos. Tapa 4 min.','Sirve con la tostada.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Tostadas con requesón',b:'prep',kcal:310,prot:20,desc:'2 tostadas integrales con requesón, miel y frutos rojos.',i:['2 rebanadas pan integral','150g requesón','1 cda miel','frutos rojos'],s:['Unta el requesón en las tostadas.','Añade la miel y los frutos rojos. Lleva envuelto.']},
+{type:'Tupper',name:'Merluza con lentejas',b:'tupper',kcal:420,prot:40,desc:'Merluza a la plancha, tarro de lentejas, espinacas salteadas.',i:['150g merluza','1 tarro lentejas','100g espinacas','ajo, aceite, limón'],s:['Cocina la merluza a la plancha 3 min por lado.','Saltea las espinacas con ajo 2 min.','Monta con las lentejas del tarro.']},
+{type:'Snack',name:'Atún con galletas de arroz',b:'tupper',kcal:150,prot:16,desc:'1 lata atún con 4 galletas de arroz.',i:['1 lata atún','4 galletas de arroz','limón'],s:['Escurre el atún. Lleva las galletas por separado para que no se ablanden.']},
+{type:'Cena',name:'Pollo con ensalada completa',b:'casa',kcal:380,prot:38,desc:'Pechuga a la plancha, ensalada con aguacate, huevo y tomate.',i:['150g pechuga','½ aguacate','2 huevos','tomate, lechuga, pepino','aceite, sal, limón'],s:['Cocina la pechuga a la plancha 4 min por lado.','Prepara la ensalada con todos los ingredientes.','Aliña y sirve con la pechuga en tiras.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Tortilla francesa con jamón',b:'casa',kcal:350,prot:28,desc:'2 huevos, jamón york y tostada integral.',i:['2 huevos','3 lonchas jamón york','1 rebanada pan integral','aceite, sal'],s:['Bate los huevos con sal y haz la tortilla.','Añade el jamón dentro antes de plegar.','Sirve con la tostada.']},
+{type:'Comida',name:'Arroz salteado con verduras y huevo',b:'casa',kcal:480,prot:28,desc:'Tarro de arroz salteado con pimiento, zanahoria y 2 huevos.',i:['1 tarro arroz','1 pimiento','1 zanahoria','½ cebolla','2 huevos','salsa de soja, aceite'],s:['Sofríe las verduras en dados 6 min.','Añade el arroz del tarro y saltea con soja 3 min.','Aparta a los lados, cuaja los huevos y mezcla.']},
+{type:'Snack',name:'Cottage con fruta',b:'casa',kcal:160,prot:16,desc:'200g cottage con fruta de temporada.',i:['200g queso cottage','fruta de temporada'],s:['Sirve en bol con la fruta cortada.']},
+{type:'Cena',name:'Rape al ajillo',b:'casa',kcal:380,prot:36,desc:'200g rape a la plancha con ajillo y ensalada verde.',i:['200g rape','4 dientes ajo','guindilla opcional','lechuga, tomate','aceite, sal, perejil'],s:['Cocina el rape a la plancha 4 min por lado.','Fríe el ajo en láminas con guindilla 1 min.','Vierte el ajillo sobre el pescado. Ensalada aparte.']}
+]}
+],
+shop:{
+'Proteínas frescas':[{n:'Pechuga de pollo',q:'450g'},{n:'Pechuga de pavo',q:'150g'},{n:'Dorada',q:'1 ud'},{n:'Merluza',q:'150g'},{n:'Rape',q:'200g'},{n:'Huevos',q:'16 uds'},{n:'Jamón york',q:'3 lonchas'},{n:'Pavo en lonchas',q:'8 lonchas'}],
+'Lácteos y proteína':[{n:'Yogur griego natural',q:'3 x 200g'},{n:'Queso cottage',q:'400g'},{n:'Requesón',q:'150g'},{n:'Leche / bebida vegetal',q:'200ml'},{n:'Proteína whey',q:'1 scoop'}],
+'Verduras y fruta':[{n:'Espinacas',q:'200g'},{n:'Brócoli',q:'100g'},{n:'Tomate cherry',q:'100g'},{n:'Pimiento rojo',q:'2 uds'},{n:'Zanahoria',q:'2 uds'},{n:'Pepino',q:'2 uds'},{n:'Cebolla',q:'2 uds'},{n:'Aguacate',q:'1 ud'},{n:'Plátano',q:'2 uds'},{n:'Mango',q:'1 ud'},{n:'Frutos rojos',q:'80g'},{n:'Fruta temporada',q:'3 piezas'},{n:'Tomate',q:'3 uds'},{n:'Lechuga',q:'1 ud'},{n:'Apio',q:'1 rama'}],
+'Latas y botes':[{n:'Atún al natural',q:'4 latas'},{n:'Pimiento asado',q:'1 bote'},{n:'Tomate triturado',q:'400ml'},{n:'Galletas de arroz',q:'4 uds'}],
+'Tarros ya hechos':[{n:'Arroz integral cocido',q:'3 tarros',t:true},{n:'Cuscús cocido',q:'1 tarro',t:true},{n:'Garbanzos cocidos',q:'1 tarro',t:true},{n:'Lentejas cocidas',q:'1 tarro',t:true}],
+'Básicos despensa':[{n:'Avena',q:'150g'},{n:'Pan integral',q:'1 barra'},{n:'Fideos finos',q:'50g'},{n:'Nueces',q:'25g'},{n:'Almendras',q:'25g'},{n:'Semillas de chía',q:'pequeño bote'}]
+}},
+{name:'Semana 3',kcal:1510,prot:109,tip:'Las albóndigas de pavo se pueden hacer el domingo y congelar. Saca las del día siguiente a la nevera cada noche.',
+days:[
+{meals:[
+{type:'Desayuno',name:'Yogur con granola proteica',b:'prep',kcal:340,prot:24,desc:'200g yogur griego, avena tostada, fruta y miel.',i:['200g yogur griego','30g avena','1 cda miel','fruta de temporada'],s:['Tuesta la avena en seco en sartén 3 min.','Deja enfriar y guarda en tupper.','Monta con el yogur y la fruta.']},
+{type:'Tupper',name:'Albóndigas de pavo con cuscús',b:'tupper',kcal:470,prot:44,desc:'Albóndigas caseras de pavo, tarro de cuscús, salsa de tomate.',i:['200g pavo picado','1 huevo','ajo, perejil','1 tarro cuscús','200ml tomate triturado'],s:['Mezcla el pavo con huevo, ajo y perejil. Forma albóndigas.','Dóralas en sartén 2 min por lado, añade el tomate 10 min.','Monta con el cuscús del tarro.']},
+{type:'Snack',name:'Requesón con semillas',b:'tupper',kcal:150,prot:14,desc:'150g requesón con semillas de chía y lino.',i:['150g requesón','1 cda chía','1 cda lino molido'],s:['Sirve el requesón con las semillas encima en tupper.']},
+{type:'Cena',name:'Bacalao a la vizcaína',b:'casa',kcal:370,prot:38,desc:'Bacalao desalado con salsa de pimiento choricero.',i:['200g bacalao desalado','2 pimientos choriceros','1 cebolla','ajo, aceite, sal'],s:['Sofríe la cebolla y el ajo 5 min.','Añade la pulpa del pimiento choricero remojado.','Coloca el bacalao y cocina tapado 12 min a fuego bajo.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Batido de proteína con cacao',b:'prep',kcal:340,prot:30,desc:'Whey, leche, avena molida, cacao puro y plátano.',i:['1 scoop whey','200ml leche','30g avena molida','1 cda cacao puro','1 plátano'],s:['Bate todo junto. Lleva en botella al gym.']},
+{type:'Tupper',name:'Salmón teriyaki con arroz',b:'tupper',kcal:460,prot:38,desc:'Salmón marinado en teriyaki casero, tarro de arroz, edamame.',i:['150g salmón','salsa de soja, miel, jengibre','1 tarro arroz','80g edamame'],s:['Marina el salmón en soja, miel y jengibre 15 min.','Hornea a 180° 15 min.','Calienta el edamame y monta con el arroz.']},
+{type:'Snack',name:'Huevo duro con aceitunas',b:'tupper',kcal:150,prot:12,desc:'2 huevos duros con un puñado de aceitunas.',i:['2 huevos','30g aceitunas'],s:['Cuece los huevos la noche anterior.','Lleva con las aceitunas en tupper.']},
+{type:'Cena',name:'Crema de calabaza con pollo',b:'casa',kcal:360,prot:32,desc:'Crema de calabaza asada con pechuga desmenuzada encima.',i:['300g calabaza','150g pechuga','½ cebolla','caldo, aceite, sal, nuez moscada'],s:['Asa la calabaza y la cebolla a 200° 25 min.','Tritura con caldo. Sazona.','Cocina la pechuga aparte, desmenuza y sirve encima.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Tostadas con sardinas',b:'prep',kcal:310,prot:24,desc:'2 tostadas con sardinas en aceite, tomate y orégano.',i:['2 rebanadas pan integral','1 lata sardinas','1 tomate','orégano'],s:['Tuesta el pan. Pon rodajas de tomate.','Coloca las sardinas escurridas encima.']},
+{type:'Tupper',name:'Pollo thai con quinoa',b:'tupper',kcal:450,prot:42,desc:'Pechuga en dados con salsa thai suave, tarro de quinoa, pimiento.',i:['150g pechuga','1 tarro quinoa','1 pimiento','salsa thai, aceite, ajo'],s:['Saltea el ajo y el pimiento en dados 3 min.','Añade el pollo y la salsa thai 5 min.','Monta con la quinoa del tarro.']},
+{type:'Snack',name:'Cottage con piña',b:'tupper',kcal:140,prot:16,desc:'200g cottage con piña natural en dados.',i:['200g queso cottage','80g piña natural'],s:['Corta la piña en dados. Sirve con el cottage en tupper.']},
+{type:'Cena',name:'Revuelto de espárragos y jamón',b:'casa',kcal:340,prot:28,desc:'3 huevos con espárragos verdes y jamón serrano.',i:['3 huevos','100g espárragos verdes','3 lonchas jamón serrano','aceite, sal'],s:['Saltea los espárragos cortados 4 min.','Añade el jamón y los huevos batidos.','Remueve a fuego bajo hasta cuajar.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Overnight oats con kiwi',b:'prep',kcal:320,prot:22,desc:'Avena, yogur griego, kiwi y pistachos.',i:['50g avena','150g yogur griego','2 kiwis','20g pistachos'],s:['Mezcla avena y yogur. Nevera.','Añade kiwi en dados y pistachos por la mañana.']},
+{type:'Tupper',name:'Ternera con garbanzos y espinacas',b:'tupper',kcal:450,prot:40,desc:'Ternera salteada, tarro de garbanzos, espinacas y tomate cherry.',i:['150g ternera magra','1 tarro garbanzos','100g espinacas','tomate cherry','ajo, comino, aceite'],s:['Saltea el ajo y la ternera en dados 5 min.','Añade comino, garbanzos y tomate 3 min.','Mezcla con las espinacas crudas al montar el tupper.']},
+{type:'Snack',name:'Yogur griego con plátano',b:'tupper',kcal:160,prot:14,desc:'200g yogur griego con plátano y canela.',i:['200g yogur griego','1 plátano','canela'],s:['Sirve en tupper con el plátano en rodajas y canela.']},
+{type:'Cena',name:'Rape con patata y puerro',b:'casa',kcal:390,prot:36,desc:'Rape al horno con patata y puerro confitado.',i:['200g rape','150g patata','1 puerro','aceite, sal, limón'],s:['Pon patata en rodajas y puerro en la bandeja con aceite 15 min.','Coloca el rape encima y hornea 15 min más con limón.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Huevos con salmón ahumado',b:'casa',kcal:370,prot:30,desc:'2 huevos revueltos con salmón ahumado y tostada integral.',i:['2 huevos','80g salmón ahumado','1 rebanada pan integral','eneldo, aceite'],s:['Haz los huevos revueltos a fuego lento.','Añade el salmón ahumado fuera del fuego.','Sirve con la tostada.']},
+{type:'Comida',name:'Ensalada de quinoa completa',b:'casa',kcal:480,prot:32,desc:'Tarro de quinoa con atún, aguacate, tomate, pepino y huevo.',i:['1 tarro quinoa','2 latas atún','½ aguacate','1 tomate','½ pepino','2 huevos','aceite, limón, sal'],s:['Cuece los huevos 10 min.','Mezcla la quinoa con el atún, el aguacate, tomate y pepino.','Añade el huevo en cuartos y aliña.']},
+{type:'Snack',name:'Requesón con nueces y miel',b:'casa',kcal:180,prot:14,desc:'150g requesón con nueces y miel.',i:['150g requesón','30g nueces','1 cda miel'],s:['Sirve en bol con las nueces y la miel.']},
+{type:'Cena',name:'Pollo con champiñones al vino',b:'casa',kcal:400,prot:38,desc:'Muslo de pollo guisado con champiñones y vino blanco.',i:['200g muslo de pollo','200g champiñones','½ vaso vino blanco','cebolla, ajo, aceite, sal'],s:['Dora el pollo en sartén 4 min por lado.','Sofríe cebolla y ajo, añade champiñones 5 min.','Vuelve a poner el pollo, añade el vino y cocina tapado 20 min.']}
+]}
+],
+shop:{
+'Proteínas frescas':[{n:'Pechuga de pollo',q:'450g'},{n:'Pavo picado',q:'200g'},{n:'Salmón fresco',q:'150g'},{n:'Salmón ahumado',q:'80g'},{n:'Ternera magra',q:'150g'},{n:'Bacalao desalado',q:'200g'},{n:'Rape',q:'200g'},{n:'Muslo de pollo',q:'200g'},{n:'Huevos',q:'14 uds'},{n:'Jamón serrano',q:'3 lonchas'}],
+'Lácteos y proteína':[{n:'Yogur griego natural',q:'3 x 200g'},{n:'Queso cottage',q:'400g'},{n:'Requesón',q:'300g'},{n:'Leche / bebida vegetal',q:'400ml'},{n:'Proteína whey',q:'1 scoop'}],
+'Verduras y fruta':[{n:'Calabaza',q:'300g'},{n:'Espárragos verdes',q:'100g'},{n:'Espinacas',q:'200g'},{n:'Champiñones',q:'200g'},{n:'Pimiento',q:'2 uds'},{n:'Tomate cherry',q:'100g'},{n:'Puerro',q:'1 ud'},{n:'Cebolla',q:'2 uds'},{n:'Aguacate',q:'1 ud'},{n:'Plátano',q:'2 uds'},{n:'Kiwi',q:'2 uds'},{n:'Piña natural',q:'80g'},{n:'Fruta temporada',q:'3 piezas'},{n:'Tomate',q:'3 uds'}],
+'Latas y botes':[{n:'Atún al natural',q:'4 latas'},{n:'Sardinas en aceite',q:'1 lata'},{n:'Tomate triturado',q:'200ml'},{n:'Aceitunas',q:'30g'},{n:'Pimiento choricero / ñora',q:'2 uds'}],
+'Tarros ya hechos':[{n:'Arroz integral cocido',q:'2 tarros',t:true},{n:'Quinoa cocida',q:'2 tarros',t:true},{n:'Cuscús cocido',q:'1 tarro',t:true},{n:'Garbanzos cocidos',q:'1 tarro',t:true}],
+'Básicos despensa':[{n:'Avena',q:'200g'},{n:'Pan integral',q:'1 barra'},{n:'Edamame congelado',q:'80g'},{n:'Pistachos',q:'20g'},{n:'Semillas chía y lino',q:'pequeño bote'},{n:'Cacao puro en polvo',q:'pequeño bote'}]
+}},
+{name:'Semana 4',kcal:1500,prot:110,tip:'Semana mediterránea. El gazpacho se hace en 5 min y aguanta 4 días en la nevera.',
+days:[
+{meals:[
+{type:'Desayuno',name:'Pan con tomate y jamón',b:'prep',kcal:310,prot:22,desc:'2 rebanadas de pan integral con tomate rallado, jamón serrano y aceite.',i:['2 rebanadas pan integral','1 tomate','3 lonchas jamón serrano','aceite, sal'],s:['Ralla el tomate. Úntalo en el pan con aceite y sal.','Coloca el jamón encima. Envuelve en film.']},
+{type:'Tupper',name:'Pollo mediterráneo con cuscús',b:'tupper',kcal:460,prot:42,desc:'Pechuga con tomate, aceitunas y orégano. Tarro de cuscús.',i:['150g pechuga','tomate cherry','aceitunas negras','1 tarro cuscús','orégano, aceite, sal'],s:['Corta la pechuga en dados y saltea 5 min.','Añade el tomate, aceitunas y orégano 3 min.','Monta con el cuscús del tarro.']},
+{type:'Snack',name:'Gazpacho con huevo duro',b:'tupper',kcal:120,prot:6,desc:'Gazpacho casero en botella y 1 huevo duro.',i:['2 tomates','½ pepino','½ pimiento rojo','1 diente ajo','aceite, vinagre, sal','2 huevos'],s:['Tritura todos los ingredientes con agua fría.','Lleva en botella. Acompaña con el huevo duro.']},
+{type:'Cena',name:'Bacalao al pil-pil',b:'casa',kcal:390,prot:38,desc:'Bacalao desalado con salsa pil-pil casera.',i:['200g bacalao desalado','4 dientes ajo','aceite de oliva suave','guindilla opcional'],s:['Confita el ajo en aceite abundante a fuego muy bajo 10 min.','Añade el bacalao con la piel hacia abajo.','Mueve la cazuela en círculos para emulsionar el pil-pil.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Batido de fresa y proteína',b:'prep',kcal:280,prot:28,desc:'Whey, leche, fresas y yogur griego.',i:['1 scoop whey','150ml leche','100g fresas','100g yogur griego'],s:['Bate todo junto. Lleva en botella.']},
+{type:'Tupper',name:'Judías blancas con atún',b:'tupper',kcal:420,prot:36,desc:'Judías del tarro, atún, cebolleta, tomate y perejil.',i:['1 tarro judías blancas','2 latas atún','1 cebolleta','1 tomate','perejil, aceite, vinagre'],s:['Escurre las judías y el atún.','Mezcla con la cebolleta, el tomate y el perejil.','Aliña con aceite y vinagre.']},
+{type:'Snack',name:'Yogur griego con melocotón',b:'tupper',kcal:140,prot:14,desc:'200g yogur griego con melocotón en trozos.',i:['200g yogur griego','1 melocotón'],s:['Corta el melocotón. Sirve con el yogur en tupper.']},
+{type:'Cena',name:'Espaguetis con gambas al ajillo',b:'casa',kcal:430,prot:34,desc:'Pasta integral con gambas, ajo y guindilla.',i:['80g espaguetis integrales','150g gambas peladas','3 dientes ajo','guindilla','perejil, aceite, sal'],s:['Cuece la pasta. Reserva agua de cocción.','Saltea el ajo y la guindilla, añade las gambas 2 min.','Añade la pasta y agua de cocción. Perejil fresco.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Tostadas con aguacate y huevo',b:'prep',kcal:360,prot:22,desc:'2 tostadas con aguacate, huevo poché y sal en escamas.',i:['2 rebanadas pan integral','½ aguacate','2 huevos','sal en escamas, limón'],s:['Unta el aguacate con limón y sal en las tostadas.','Cuece los huevos pochés 3 min.','Coloca encima y lleva envuelto.']},
+{type:'Tupper',name:'Pavo con lentejas y zanahoria',b:'tupper',kcal:440,prot:40,desc:'Pechuga de pavo, tarro de lentejas, zanahoria y comino.',i:['150g pavo','1 tarro lentejas','1 zanahoria','comino, ajo, aceite, sal'],s:['Saltea la zanahoria en dados con ajo 3 min.','Añade el pavo en tiras 4 min.','Incorpora las lentejas del tarro y el comino 2 min.']},
+{type:'Snack',name:'Atún con aguacate',b:'tupper',kcal:160,prot:16,desc:'1 lata atún mezclada con ½ aguacate en dados.',i:['1 lata atún','½ aguacate','limón, sal'],s:['Escurre el atún. Mezcla con el aguacate y limón.']},
+{type:'Cena',name:'Pollo a la mostaza con boniato',b:'casa',kcal:400,prot:36,desc:'Muslo de pollo con salsa de mostaza y boniato asado.',i:['200g muslo de pollo','1 cda mostaza antigua','150g boniato','aceite, sal, tomillo'],s:['Unta el pollo con mostaza, sal y tomillo.','Rodea con el boniato en dados.','Hornea a 200° 35 min.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Overnight oats con naranja',b:'prep',kcal:320,prot:22,desc:'Avena, yogur griego, naranja y almendras.',i:['50g avena','150g yogur griego','1 naranja','20g almendras laminadas'],s:['Mezcla avena y yogur. Nevera.','Añade la naranja en gajos y las almendras.']},
+{type:'Tupper',name:'Merluza con garbanzos al pimentón',b:'tupper',kcal:430,prot:40,desc:'Merluza a la plancha, tarro de garbanzos con pimentón y espinacas.',i:['150g merluza','1 tarro garbanzos','pimentón dulce y picante','ajo, espinacas, aceite'],s:['Saltea el ajo, añade los garbanzos y el pimentón 3 min.','Añade espinacas y mezcla 1 min.','Cocina la merluza a la plancha 3 min por lado. Monta.']},
+{type:'Snack',name:'Requesón con kiwi',b:'tupper',kcal:150,prot:14,desc:'150g requesón con kiwi en dados.',i:['150g requesón','2 kiwis'],s:['Sirve en tupper con el kiwi en dados.']},
+{type:'Cena',name:'Salmón con ensalada templada',b:'casa',kcal:400,prot:36,desc:'Salmón a la plancha con judías verdes, tomate y huevo.',i:['150g salmón','100g judías verdes','1 tomate','2 huevos','aceite, sal, mostaza'],s:['Cuece las judías 5 min.','Cocina el salmón a la plancha 4 min por lado.','Monta con el tomate, el huevo y aliña con mostaza.']}
+]},
+{meals:[
+{type:'Desayuno',name:'French toast proteica',b:'casa',kcal:360,prot:26,desc:'2 rebanadas de pan integral empapadas en huevo y canela.',i:['2 rebanadas pan integral','2 huevos','100ml leche','canela, vainilla, aceite'],s:['Bate los huevos con la leche, canela y vainilla.','Empapa el pan y cocina en sartén 2 min por lado.','Sirve con yogur o fruta.']},
+{type:'Comida',name:'Paella de pollo y verduras',b:'casa',kcal:500,prot:34,desc:'Paella con pechuga, pimiento, judías y azafrán.',i:['1 tarro arroz','150g pechuga','pimiento, judías verdes','tomate, azafrán, caldo','aceite, sal, pimentón'],s:['Sofríe la pechuga en dados.','Sofríe el pimiento y tomate rallado 5 min.','Añade caldo, azafrán, pimentón, arroz y pollo. 18 min.']},
+{type:'Snack',name:'Huevos duros con pimentón',b:'casa',kcal:140,prot:12,desc:'2 huevos duros con pimentón ahumado.',i:['2 huevos','pimentón ahumado','sal'],s:['Sirve los huevos duros cortados con pimentón y sal.']},
+{type:'Cena',name:'Crema de brócoli con pollo',b:'casa',kcal:360,prot:34,desc:'Crema de brócoli con yogur y pechuga desmenuzada.',i:['300g brócoli','150g pechuga','100g yogur griego','caldo, ajo, aceite, sal'],s:['Cuece el brócoli con ajo 10 min.','Tritura con caldo y el yogur.','Cocina la pechuga, desmenuza y sirve encima.']}
+]}
+],
+shop:{
+'Proteínas frescas':[{n:'Pechuga de pollo',q:'450g'},{n:'Pechuga de pavo',q:'150g'},{n:'Salmón fresco',q:'150g'},{n:'Merluza',q:'150g'},{n:'Bacalao desalado',q:'200g'},{n:'Muslo de pollo',q:'200g'},{n:'Gambas peladas',q:'150g'},{n:'Huevos',q:'16 uds'},{n:'Jamón serrano',q:'3 lonchas'}],
+'Lácteos y proteína':[{n:'Yogur griego natural',q:'4 x 200g'},{n:'Requesón',q:'300g'},{n:'Leche / bebida vegetal',q:'400ml'},{n:'Proteína whey',q:'1 scoop'}],
+'Verduras y fruta':[{n:'Brócoli',q:'300g'},{n:'Judías verdes',q:'200g'},{n:'Boniato',q:'150g'},{n:'Pimiento rojo',q:'3 uds'},{n:'Tomate cherry',q:'100g'},{n:'Tomate',q:'5 uds'},{n:'Pepino',q:'1 ud'},{n:'Zanahoria',q:'1 ud'},{n:'Aguacate',q:'2 uds'},{n:'Naranja',q:'1 ud'},{n:'Kiwi',q:'2 uds'},{n:'Melocotón',q:'1 ud'},{n:'Fresas',q:'100g'}],
+'Latas y botes':[{n:'Atún al natural',q:'4 latas'},{n:'Aceitunas negras',q:'pequeño bote'},{n:'Tomate triturado',q:'200ml'},{n:'Mostaza antigua',q:'pequeño bote'}],
+'Tarros ya hechos':[{n:'Arroz integral cocido',q:'2 tarros',t:true},{n:'Cuscús cocido',q:'1 tarro',t:true},{n:'Lentejas cocidas',q:'1 tarro',t:true},{n:'Garbanzos cocidos',q:'1 tarro',t:true},{n:'Judías blancas cocidas',q:'1 tarro',t:true}],
+'Básicos despensa':[{n:'Avena',q:'100g'},{n:'Pan integral',q:'1 barra'},{n:'Espaguetis integrales',q:'80g'},{n:'Almendras laminadas',q:'20g'},{n:'Azafrán',q:'1 sobre'}]
+}},
+{name:'Semana 5',kcal:1495,prot:107,tip:'Semana de sabores asiáticos. El bowl de pollo con cacahuete es el favorito de muchos.',
+days:[
+{meals:[
+{type:'Desayuno',name:'Smoothie bowl proteico',b:'prep',kcal:350,prot:28,desc:'Base de yogur griego con plátano congelado, frutos rojos y granola.',i:['200g yogur griego','1 plátano congelado','80g frutos rojos','30g avena tostada','1 scoop whey'],s:['Bate el yogur con el plátano congelado y el whey.','Sirve en tupper, añade los frutos rojos y la avena.','Lleva tapado.']},
+{type:'Tupper',name:'Bowl de pollo con cacahuete',b:'tupper',kcal:470,prot:44,desc:'Pechuga, tarro de arroz, pepino, zanahoria y salsa de cacahuete.',i:['150g pechuga','1 tarro arroz','½ pepino','1 zanahoria','2 cdas mantequilla cacahuete','salsa de soja, limón, ajo'],s:['Cocina la pechuga a la plancha. Córtala en tiras.','Mezcla la mantequilla con soja, limón y ajo.','Monta con el arroz, las verduras y la salsa encima.']},
+{type:'Snack',name:'Cottage con mango',b:'tupper',kcal:140,prot:16,desc:'200g cottage con mango en dados.',i:['200g queso cottage','½ mango'],s:['Corta el mango. Sirve con el cottage en tupper.']},
+{type:'Cena',name:'Sopa de miso con tofu',b:'casa',kcal:280,prot:22,desc:'Caldo con pasta de miso, tofu firme y alga wakame.',i:['2 cdas pasta miso','100g tofu firme','alga wakame seca','cebollino','750ml agua'],s:['Hidrata el alga wakame 5 min.','Calienta el agua sin hervir. Disuelve el miso.','Añade el tofu en dados, el alga y el cebollino.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Tostadas con huevo y espinacas',b:'prep',kcal:340,prot:24,desc:'2 tostadas con espinacas salteadas, 2 huevos y cottage.',i:['2 rebanadas pan integral','2 huevos','80g espinacas','50g queso cottage','ajo, aceite'],s:['Saltea las espinacas con ajo 2 min.','Fríe o pocha los huevos.','Monta en las tostadas con el cottage.']},
+{type:'Tupper',name:'Atún con quinoa y edamame',b:'tupper',kcal:430,prot:38,desc:'Atún al natural, tarro de quinoa, edamame, pepino y sésamo.',i:['2 latas atún','1 tarro quinoa','80g edamame','½ pepino','sésamo, aceite de sésamo, soja'],s:['Calienta el edamame.','Mezcla la quinoa con el atún, el edamame y el pepino.','Aliña con aceite de sésamo y soja.']},
+{type:'Snack',name:'Yogur griego con semillas',b:'tupper',kcal:150,prot:14,desc:'200g yogur griego con semillas de girasol y calabaza.',i:['200g yogur griego','1 cda semillas girasol','1 cda semillas calabaza'],s:['Sirve en tupper con las semillas encima.']},
+{type:'Cena',name:'Ternera al wok con brócoli',b:'casa',kcal:380,prot:34,desc:'Ternera en tiras salteada a fuego alto con brócoli y soja.',i:['150g ternera','200g brócoli','3 dientes ajo','salsa de soja, aceite de sésamo','jengibre'],s:['Calienta el wok a fuego muy alto.','Saltea el ajo y jengibre 1 min. Añade la ternera 3 min.','Añade el brócoli y la soja 3 min. Aceite de sésamo al final.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Batido con mantequilla cacahuete',b:'prep',kcal:360,prot:30,desc:'Whey, leche, plátano, mantequilla de cacahuete y cacao.',i:['1 scoop whey','200ml leche','1 plátano','1 cda mantequilla cacahuete','1 cda cacao puro'],s:['Bate todo junto. Lleva en botella.']},
+{type:'Tupper',name:'Salmón con cuscús y tzatziki',b:'tupper',kcal:450,prot:38,desc:'Salmón a la plancha, tarro de cuscús y tzatziki casero.',i:['150g salmón','1 tarro cuscús','½ pepino','100g yogur griego','ajo, eneldo, limón, sal'],s:['Mezcla el yogur con pepino rallado, ajo, eneldo y limón.','Cocina el salmón a la plancha 4 min por lado.','Monta con el cuscús y el tzatziki aparte.']},
+{type:'Snack',name:'Huevo duro con zanahoria',b:'tupper',kcal:130,prot:12,desc:'2 huevos duros y palitos de zanahoria.',i:['2 huevos','1 zanahoria'],s:['Cuece los huevos. Corta la zanahoria. Lleva en tupper.']},
+{type:'Cena',name:'Pollo tikka con yogur',b:'casa',kcal:370,prot:36,desc:'Pechuga marinada en tikka masala con yogur y ensalada.',i:['200g pechuga','2 cdas yogur griego','tikka masala en polvo','ensalada verde'],s:['Marina la pechuga con el yogur y las especias al menos 1h.','Cocina a la plancha o al horno 15 min.','Sirve con la ensalada verde.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Overnight oats con coco',b:'prep',kcal:330,prot:22,desc:'Avena con leche de coco, piña y coco rallado.',i:['50g avena','150ml leche de coco','80g piña','1 cda coco rallado'],s:['Mezcla avena y leche de coco. Nevera.','Añade la piña y el coco por la mañana.']},
+{type:'Tupper',name:'Pollo con garbanzos ras el hanout',b:'tupper',kcal:450,prot:42,desc:'Pechuga con ras el hanout, tarro de garbanzos y cilantro.',i:['150g pechuga','1 tarro garbanzos','tomate cherry','ras el hanout','cilantro, aceite, sal'],s:['Saltea el pollo en dados con ras el hanout 5 min.','Añade los garbanzos y el tomate 3 min.','Sirve con cilantro fresco.']},
+{type:'Snack',name:'Requesón con piña',b:'tupper',kcal:150,prot:14,desc:'150g requesón con piña en trozos.',i:['150g requesón','80g piña'],s:['Sirve en tupper con la piña.']},
+{type:'Cena',name:'Merluza al vapor con jengibre',b:'casa',kcal:320,prot:34,desc:'Merluza al vapor con jengibre, soja y cebollino.',i:['200g merluza','jengibre fresco','salsa de soja','cebollino, aceite de sésamo'],s:['Coloca la merluza en el cestillo de vapor.','Cocina 8-10 min.','Sirve con jengibre rallado, soja y aceite de sésamo.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Huevos benedictinos ligeros',b:'casa',kcal:370,prot:28,desc:'2 huevos pochés sobre tostada con jamón york y salsa de yogur.',i:['2 huevos','2 rebanadas pan integral','3 lonchas jamón york','100g yogur griego','mostaza, limón, sal'],s:['Mezcla yogur con mostaza y limón para la salsa.','Pocha los huevos 3 min.','Monta con el jamón y la salsa.']},
+{type:'Comida',name:'Bowl de ternera con arroz y kimchi',b:'casa',kcal:490,prot:36,desc:'Ternera salteada, tarro de arroz, edamame y kimchi.',i:['150g ternera','1 tarro arroz','80g edamame','kimchi al gusto','soja, sésamo, aceite'],s:['Saltea la ternera en tiras con soja.','Calienta el arroz del tarro y el edamame.','Monta el bowl con sésamo por encima.']},
+{type:'Snack',name:'Yogur griego con fruta',b:'casa',kcal:150,prot:14,desc:'200g yogur griego con fruta de temporada.',i:['200g yogur griego','fruta de temporada'],s:['Sirve en bol con la fruta cortada.']},
+{type:'Cena',name:'Gambas al ajillo con espaguetis',b:'casa',kcal:430,prot:34,desc:'Gambas al ajillo con espaguetis integrales.',i:['150g gambas peladas','80g espaguetis integrales','4 dientes ajo','guindilla','aceite, sal, perejil'],s:['Cuece la pasta. Reserva agua de cocción.','Fríe el ajo laminado y la guindilla 2 min. Añade las gambas.','Mezcla con la pasta y agua de cocción. Perejil fresco.']}
+]}
+],
+shop:{
+'Proteínas frescas':[{n:'Pechuga de pollo',q:'500g'},{n:'Ternera magra',q:'300g'},{n:'Salmón fresco',q:'150g'},{n:'Merluza',q:'200g'},{n:'Gambas peladas',q:'150g'},{n:'Tofu firme',q:'100g'},{n:'Huevos',q:'12 uds'},{n:'Jamón york',q:'3 lonchas'}],
+'Lácteos y proteína':[{n:'Yogur griego natural',q:'5 x 200g'},{n:'Queso cottage',q:'200g'},{n:'Requesón',q:'150g'},{n:'Leche / bebida vegetal',q:'400ml'},{n:'Leche de coco',q:'150ml'},{n:'Proteína whey',q:'2 scoops'}],
+'Verduras y fruta':[{n:'Brócoli',q:'200g'},{n:'Pepino',q:'2 uds'},{n:'Zanahoria',q:'2 uds'},{n:'Tomate cherry',q:'100g'},{n:'Plátano (congelar 1)',q:'3 uds'},{n:'Frutos rojos',q:'80g'},{n:'Mango',q:'1 ud'},{n:'Piña natural',q:'160g'},{n:'Fruta temporada',q:'3 piezas'}],
+'Latas y botes':[{n:'Atún al natural',q:'2 latas'},{n:'Kimchi',q:'pequeño bote'},{n:'Pasta miso',q:'pequeño bote'},{n:'Alga wakame seca',q:'pequeño paquete'}],
+'Tarros ya hechos':[{n:'Arroz integral cocido',q:'3 tarros',t:true},{n:'Quinoa cocida',q:'1 tarro',t:true},{n:'Cuscús cocido',q:'1 tarro',t:true},{n:'Garbanzos cocidos',q:'1 tarro',t:true}],
+'Básicos despensa':[{n:'Avena',q:'100g'},{n:'Pan integral',q:'1 barra'},{n:'Espaguetis integrales',q:'160g'},{n:'Edamame congelado',q:'160g'},{n:'Mantequilla de cacahuete',q:'bote'},{n:'Coco rallado',q:'pequeño paquete'},{n:'Sésamo, aceite de sésamo',q:'al gusto'},{n:'Tikka masala, ras el hanout',q:'al gusto'}]
+}},
+{name:'Semana 6',kcal:1505,prot:112,tip:'Semana de comfort food saludable. El chili de pavo es perfecto para batch cooking del domingo.',
+days:[
+{meals:[
+{type:'Desayuno',name:'Pancakes proteicos',b:'prep',kcal:360,prot:30,desc:'Tortitas de avena, plátano y huevo. Masa lista la noche anterior.',i:['50g avena molida','1 plátano maduro','2 huevos','1 scoop whey','canela, aceite de coco'],s:['Tritura la avena. Mezcla con el plátano chafado, huevos, whey y canela.','Guarda la masa en la nevera.','Cocina en sartén con aceite de coco 2 min por lado.']},
+{type:'Tupper',name:'Chili de pavo con arroz',b:'tupper',kcal:480,prot:46,desc:'Chili de pavo picado, tarro de alubias y tarro de arroz.',i:['200g pavo picado','1 tarro alubias rojas','1 tarro arroz','tomate triturado','cebolla, pimiento, comino, chile'],s:['Sofríe cebolla y pimiento 4 min. Añade el pavo 5 min.','Añade comino, chile, alubias y tomate. Cocina 15 min.','Monta con el arroz del tarro.']},
+{type:'Snack',name:'Requesón con melocotón',b:'tupper',kcal:150,prot:14,desc:'150g requesón con melocotón en dados.',i:['150g requesón','1 melocotón'],s:['Corta el melocotón. Sirve con el requesón en tupper.']},
+{type:'Cena',name:'Bacalao con pisto casero',b:'casa',kcal:370,prot:36,desc:'Bacalao desalado al horno sobre pisto de calabacín y pimiento.',i:['200g bacalao desalado','1 calabacín','1 tomate','½ pimiento rojo','cebolla, ajo, aceite, sal'],s:['Sofríe cebolla y ajo. Añade pimiento y calabacín 5 min.','Añade el tomate y cocina 10 min.','Coloca el bacalao encima y hornea a 180° 15 min.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Batido de avena y canela',b:'prep',kcal:340,prot:28,desc:'Whey, leche, avena, canela y manzana.',i:['1 scoop whey','200ml leche','30g avena','½ manzana rallada','canela'],s:['Bate todo junto. Lleva en botella al gym.']},
+{type:'Tupper',name:'Salmón con lentejas y cúrcuma',b:'tupper',kcal:460,prot:40,desc:'Salmón horneado, tarro de lentejas, espinacas y cúrcuma.',i:['150g salmón','1 tarro lentejas','100g espinacas','cúrcuma, ajo, aceite, limón'],s:['Hornea el salmón a 180° 15 min.','Calienta las lentejas con ajo, cúrcuma y limón.','Monta con las espinacas crudas y el salmón encima.']},
+{type:'Snack',name:'Yogur griego con almendras',b:'tupper',kcal:150,prot:16,desc:'200g yogur griego con almendras y canela.',i:['200g yogur griego','25g almendras','canela'],s:['Sirve en tupper con almendras y canela.']},
+{type:'Cena',name:'Pollo al limón con espárragos',b:'casa',kcal:360,prot:38,desc:'Pechuga al horno con costra de limón y espárragos.',i:['200g pechuga','100g espárragos verdes','1 limón','ajo, aceite, sal, romero'],s:['Marina la pechuga con limón, ajo, aceite y romero.','Coloca con los espárragos en bandeja.','Hornea a 200° 25 min.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Tostadas con atún y aguacate',b:'prep',kcal:330,prot:24,desc:'2 tostadas con aguacate aplastado, atún y tomate.',i:['2 rebanadas pan integral','½ aguacate','1 lata atún','1 tomate','sal, limón'],s:['Unta el aguacate con limón y sal.','Añade el tomate en rodajas y el atún escurrido encima.']},
+{type:'Tupper',name:'Pavo con quinoa y verduras asadas',b:'tupper',kcal:450,prot:42,desc:'Pechuga de pavo, tarro de quinoa, pimiento y berenjena asados.',i:['150g pechuga pavo','1 tarro quinoa','1 pimiento','½ berenjena','aceite, sal, tomillo'],s:['Asa el pimiento y la berenjena en dados a 200° 20 min.','Cocina el pavo a la plancha 4 min por lado.','Monta con la quinoa y las verduras asadas.']},
+{type:'Snack',name:'Huevo duro con hummus',b:'tupper',kcal:160,prot:14,desc:'2 huevos duros con 2 cucharadas de hummus.',i:['2 huevos','2 cdas hummus'],s:['Cuece los huevos la noche anterior.','Lleva con el hummus en tupper pequeño.']},
+{type:'Cena',name:'Almejas a la marinera',b:'casa',kcal:320,prot:28,desc:'Almejas con caldo, ajo, vino blanco y perejil.',i:['200g almejas','3 dientes ajo','½ vaso vino blanco','1 rebanada pan integral','aceite, perejil, sal'],s:['Abre las almejas en sartén con agua 3 min.','Fríe el ajo, añade el vino 2 min.','Añade las almejas y el caldo. Perejil fresco.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Overnight oats con chocolate',b:'prep',kcal:340,prot:24,desc:'Avena, yogur griego, cacao puro, plátano y almendras.',i:['50g avena','150g yogur griego','1 cda cacao puro','1 plátano','20g almendras'],s:['Mezcla avena, yogur y cacao. Nevera.','Añade el plátano y las almendras por la mañana.']},
+{type:'Tupper',name:'Ternera con garbanzos y romesco',b:'tupper',kcal:460,prot:40,desc:'Ternera salteada, tarro de garbanzos y salsa romesco.',i:['150g ternera','1 tarro garbanzos','2 cdas salsa romesco','tomate cherry, aceite, sal'],s:['Saltea la ternera en dados 5 min.','Añade los garbanzos y el tomate cherry 3 min.','Sirve con el romesco como salsa.']},
+{type:'Snack',name:'Cottage con frutos rojos',b:'tupper',kcal:140,prot:16,desc:'200g cottage con frutos rojos.',i:['200g queso cottage','80g frutos rojos'],s:['Sirve en tupper con los frutos rojos.']},
+{type:'Cena',name:'Salmón con guacamole',b:'casa',kcal:420,prot:36,desc:'Salmón a la plancha con guacamole casero y ensalada.',i:['150g salmón','1 aguacate','1 tomate','½ cebolla','limón, cilantro, sal'],s:['Chafa el aguacate con tomate, cebolla, limón y cilantro.','Cocina el salmón a la plancha 4 min por lado.','Sirve con el guacamole y ensalada verde.']}
+]},
+{meals:[
+{type:'Desayuno',name:'Shakshuka proteica',b:'casa',kcal:380,prot:30,desc:'3 huevos cocinados en salsa de tomate especiada con feta.',i:['3 huevos','300ml tomate triturado','50g queso feta','pimiento, cebolla, comino, pimentón','pan integral'],s:['Sofríe cebolla y pimiento. Añade especias y tomate 8 min.','Haz huecos y rompe los huevos. Tapa 4 min.','Desmorona el feta encima. Sirve con pan.']},
+{type:'Comida',name:'Pasta boloñesa de pavo',b:'casa',kcal:500,prot:40,desc:'Pasta integral con salsa boloñesa casera de pavo picado.',i:['80g pasta integral','200g pavo picado','tomate triturado','cebolla, ajo, zanahoria','aceite, sal, orégano'],s:['Sofríe cebolla, ajo y zanahoria 5 min.','Añade el pavo 5 min. Añade el tomate y orégano.','Cocina 20 min a fuego bajo. Sirve con la pasta.']},
+{type:'Snack',name:'Pan con mantequilla cacahuete',b:'casa',kcal:200,prot:10,desc:'1 rebanada pan integral con mantequilla de cacahuete y plátano.',i:['1 rebanada pan integral','1 cda mantequilla cacahuete','½ plátano'],s:['Unta la mantequilla en el pan. Coloca el plátano en rodajas.']},
+{type:'Cena',name:'Dorada al salt con verduras',b:'casa',kcal:380,prot:38,desc:'Dorada entera al salt con verduras al horno.',i:['1 dorada','1kg sal gorda','1 limón','pimiento, calabacín','aceite, sal, tomillo'],s:['Cubre la bandeja con sal gorda. Coloca la dorada y cúbrela con más sal.','Hornea a 200° 25 min.','Asa las verduras en otra bandeja a la vez.']}
+]}
+],
+shop:{
+'Proteínas frescas':[{n:'Pechuga de pollo',q:'200g'},{n:'Pavo picado',q:'400g'},{n:'Pechuga de pavo',q:'150g'},{n:'Salmón fresco',q:'300g'},{n:'Bacalao desalado',q:'200g'},{n:'Dorada',q:'1 ud'},{n:'Ternera magra',q:'150g'},{n:'Almejas',q:'200g'},{n:'Huevos',q:'14 uds'}],
+'Lácteos y proteína':[{n:'Yogur griego natural',q:'3 x 200g'},{n:'Queso cottage',q:'200g'},{n:'Requesón',q:'150g'},{n:'Queso feta',q:'50g'},{n:'Leche / bebida vegetal',q:'400ml'},{n:'Proteína whey',q:'2 scoops'}],
+'Verduras y fruta':[{n:'Espinacas',q:'100g'},{n:'Espárragos verdes',q:'100g'},{n:'Calabacín',q:'2 uds'},{n:'Berenjena',q:'1 ud'},{n:'Pimiento rojo',q:'3 uds'},{n:'Tomate cherry',q:'100g'},{n:'Tomate',q:'5 uds'},{n:'Aguacate',q:'2 uds'},{n:'Plátano',q:'3 uds'},{n:'Melocotón',q:'1 ud'},{n:'Manzana',q:'1 ud'},{n:'Frutos rojos',q:'80g'}],
+'Latas y botes':[{n:'Atún al natural',q:'1 lata'},{n:'Tomate triturado',q:'600ml'},{n:'Salsa romesco',q:'pequeño bote'},{n:'Hummus',q:'pequeño bote'}],
+'Tarros ya hechos':[{n:'Arroz integral cocido',q:'2 tarros',t:true},{n:'Quinoa cocida',q:'1 tarro',t:true},{n:'Lentejas cocidas',q:'1 tarro',t:true},{n:'Alubias rojas cocidas',q:'1 tarro',t:true},{n:'Garbanzos cocidos',q:'1 tarro',t:true}],
+'Básicos despensa':[{n:'Avena',q:'150g'},{n:'Pan integral',q:'1 barra'},{n:'Pasta integral',q:'160g'},{n:'Almendras',q:'25g'},{n:'Mantequilla de cacahuete',q:'bote'},{n:'Cacao puro en polvo',q:'al gusto'},{n:'Sal gorda (para la dorada)',q:'1kg'},{n:'Aceite de coco',q:'pequeño bote'}]
+}}
+];
+
+let aw=0,ad=0,av='menu',chk={};
+
+function init(){
+  setTimeout(()=>{
+    const sp=document.getElementById('splash');
+    sp.style.opacity='0';
+    setTimeout(()=>{sp.style.display='none';document.getElementById('app').style.display='flex';renderWks();renderMenu();},500);
+  },1800);
+}
+
+function renderWks(){
+  document.getElementById('wscroll').innerHTML=W.map((w,i)=>
+    `<button class="wbtn${i===aw?' active':''}" onclick="selW(${i})">${w.name}</button>`
+  ).join('');
+}
+
+function selW(i){
+  aw=i;ad=0;
+  document.getElementById('scroll').scrollTop=0;
+  renderWks();
+  document.getElementById('htitle').textContent=W[aw].name;
+  if(av==='menu')renderMenu();else{document.getElementById('hbadge').textContent='Compra';renderShop();}
+}
+
+function setView(v){
+  av=v;
+  document.getElementById('vmenu').style.display=v==='menu'?'':'none';
+  document.getElementById('vshop').style.display=v==='shop'?'':'none';
+  document.querySelectorAll('.vtab').forEach((t,i)=>t.classList.toggle('active',(i===0&&v==='menu')||(i===1&&v==='shop')));
+  document.getElementById('scroll').scrollTop=0;
+  if(v==='menu'){document.getElementById('hbadge').textContent=DAYS[ad];renderMenu();}
+  else{document.getElementById('hbadge').textContent='Compra';renderShop();}
+}
+
+function renderMenu(){
+  const w=W[aw];
+  document.getElementById('htitle').textContent=w.name;
+  document.getElementById('hbadge').textContent=DAYS[ad];
+  document.getElementById('stats').innerHTML=`
+    <div class="statpill g"><div class="sl">Calorías/día</div><div class="sv">${w.kcal}<span class="su"> kcal</span></div></div>
+    <div class="statpill b"><div class="sl">Proteína/día</div><div class="sv">${w.prot}<span class="su"> g</span></div></div>
+    <div class="statpill o"><div class="sl">Comidas/día</div><div class="sv">4<span class="su"> tomas</span></div></div>
+  `;
+  document.getElementById('daynav').innerHTML=DAYS.map((d,i)=>
+    `<button class="dbtn${i===ad?' active':''}" onclick="selD(${i})"><span class="ds">${DS[i]}</span><span class="dn">${d.slice(0,3)}</span></button>`
+  ).join('');
+  renderMeals();
+}
+
+function selD(i){
+  ad=i;
+  document.querySelectorAll('.dbtn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.getElementById('hbadge').textContent=DAYS[i];
+  document.getElementById('scroll').scrollTop=0;
+  renderMeals();
+}
+
+function renderMeals(){
+  const meals=W[aw].days[ad].meals;
+  document.getElementById('mlist').innerHTML=meals.map((m)=>`
+    <div class="mcard">
+      <div class="mcard-head">
+        <div class="mmeta"><span class="mtype">${m.type}</span><span class="mbadge ${BC[m.b]}">${BL[m.b]}</span></div>
+        <div class="mname">${m.name}</div>
+        <div class="mdesc">${m.desc}</div>
+      </div>
+      <div class="mfoot">
+        <span class="mmacros"><span>${m.kcal}</span> kcal · <span>${m.prot}g</span> prot</span>
+        <button class="rtoggle" onclick="togR(this)">Ver receta</button>
+      </div>
+      <div class="rpanel">
+        <div class="rlabel">Ingredientes</div>
+        <div class="ichips">${m.i.map(x=>`<span class="ichip">${x}</span>`).join('')}</div>
+        <div class="rlabel">Preparación</div>
+        ${m.s.map((s,j)=>`<div class="step"><div class="snum">${j+1}</div><div class="stxt">${s}</div></div>`).join('')}
+      </div>
+    </div>
+  `).join('')+`<div class="tip"><strong>Tip:</strong> ${W[aw].tip}</div>`;
+}
+
+function togR(btn){
+  const p=btn.closest('.mcard').querySelector('.rpanel');
+  const o=p.classList.toggle('open');
+  btn.textContent=o?'Ocultar':'Ver receta';
+}
+
+function renderShop(){
+  const key=`w${aw}`;
+  if(!chk[key])chk[key]={};
+  const shop=W[aw].shop;
+  let tot=0,don=0,html='';
+  for(const[cat,items]of Object.entries(shop)){
+    html+=`<div class="shopsec"><div class="shopcat">${cat}</div>`;
+    items.forEach((item,i)=>{
+      const id=`${key}-${cat}-${i}`;
+      const d=!!chk[key][id];
+      if(d)don++;tot++;
+      html+=`<div class="shopitem${d?' done':''}" onclick="togItem('${key}','${id}',this)">
+        <div class="checkc">${d?`<svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`:''}
+        </div>
+        <div class="shopitem-info"><span class="shopitem-name">${item.n}${item.t?'<span class="tarrotag">tarro</span>':''}</span></div>
+        <span class="shopitem-qty">${item.q}</span>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  document.getElementById('shoplist').innerHTML=html;
+  updProg(key);
+}
+
+function updProg(key){
+  const shop=W[aw].shop;
+  let tot=0,don=0;
+  for(const[cat,items]of Object.entries(shop)){
+    items.forEach((_,i)=>{tot++;if(chk[key][`${key}-${cat}-${i}`])don++;});
+  }
+  document.getElementById('pcnt').textContent=`${don} / ${tot}`;
+  document.getElementById('pfill').style.width=tot?`${Math.round(don/tot*100)}%`:'0%';
+}
+
+function togItem(key,id,el){
+  chk[key][id]=!chk[key][id];
+  const d=chk[key][id];
+  el.classList.toggle('done',d);
+  const c=el.querySelector('.checkc');
+  c.style.background=d?'#30d158':'';
+  c.style.borderColor=d?'#30d158':'';
+  c.innerHTML=d?`<svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`:'';
+  updProg(key);
+}
+
+function clearShop(){
+  chk[`w${aw}`]={};
+  renderShop();
+}
+
+init();
+</script>
+</body>
+</html>
